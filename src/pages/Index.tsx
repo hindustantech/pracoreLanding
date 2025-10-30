@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import StartupCard from "@/components/StartupCard";
 import AboutSection from "@/components/AboutSection";
@@ -10,7 +11,10 @@ import salonmasterMockup from "@/assets/salonmaster-mockup.png";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <HeroSection />
+      <Navbar />
+      <div id="home">
+        <HeroSection />
+      </div>
       
       <section id="startups" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
@@ -47,9 +51,15 @@ const Index = () => {
         </div>
       </section>
 
-      <AboutSection />
-      <EmployeeAttendance />
-      <ContactForm />
+      <div id="about">
+        <AboutSection />
+      </div>
+      <div id="attendance">
+        <EmployeeAttendance />
+      </div>
+      <div id="contact">
+        <ContactForm />
+      </div>
       <Footer />
     </div>
   );
