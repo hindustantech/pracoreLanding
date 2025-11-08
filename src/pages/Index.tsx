@@ -11,12 +11,25 @@ import salonmasterMockup from "@/assets/salonmaster-mockup1.png";
 
 const Index = () => {
   return (
+<<<<<<< HEAD
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {/* ✅ Navbar */}
+      <Navbar />
+
+      {/* ✅ Hero Section */}
+      <section id="home">
+        <HeroSection />
+      </section>
+
+      {/* ✅ Startups Section */}
+=======
     <div className="min-h-screen">
       <Navbar />
       <div id="home">
         <HeroSection />
       </div>
       
+>>>>>>> f3cd0b43c67dabd2babc88d89d44f0d202137e18
       <section id="startups" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-up">
@@ -85,6 +98,10 @@ operating system for the modern salon professional.
         <AboutSection />
       </section>
 
+      {/* ✅ Employee Attendance Section */}
+      {/* <section id="attendance" className="py-20 bg-secondary/10">
+        <EmployeeAttendance />
+      </section> */}
 
       {/* ✅ Contact Section */}
       <section id="contact" className="py-20">

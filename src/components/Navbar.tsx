@@ -13,24 +13,26 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ Scroll effect for background change
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+<<<<<<< HEAD
   // ✅ Filter nav items based on login status
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Our Solutions", href: "#startups" },
-    // Show "Employee Attendance" only if logged in
     ...(isLoggedIn ? [{ name: "Employee Attendance", href: "/attendance" }] : []),
     { name: "Career", href: "/Career" },
     { name: "About Us", href: "#about" },
+    // { name: "Contact", href: "#contact" },
   ];
 
-  // ✅ Handle navigation and smooth scroll
-  const handleNavClick = (href: string) => {
+  // ✅ Handle nav click (smooth scroll or navigation)
+  const handleNavClick = (href) => {
     if (href.startsWith("/")) {
       navigate(href);
       setIsOpen(false);
@@ -47,11 +49,12 @@ const Navbar = () => {
       const el = document.querySelector(href);
       if (el) el.scrollIntoView({ behavior: "smooth" });
     }
+
     setIsOpen(false);
   };
 
-  // ✅ Determine active tab for underline
-  const isActive = (href: string) => {
+  // ✅ Active tab indicator
+  const isActive = (href) => {
     if (href.startsWith("/") && location.pathname === href) return true;
     if (href.startsWith("#") && location.hash === href) return true;
     return false;
@@ -86,7 +89,6 @@ const Navbar = () => {
                 }`}
               >
                 {item.name}
-                {/* 🔽 Underline animation */}
                 <span
                   className={`absolute left-0 bottom-0 h-[2px] bg-primary transition-all duration-300 ${
                     isActive(item.href) ? "w-full" : "w-0 group-hover:w-full"
