@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
-              Precore
+              Praecore
             </h3>
             <p className="text-muted-foreground mb-4">
               Building products that help businesses grow.
@@ -110,7 +110,7 @@ const Footer = () => {
         <div className="pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © {currentYear} Precore. All rights reserved.
+              © {currentYear} Praecore. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm">
               Made with ❤️ in India

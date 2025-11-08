@@ -1,343 +1,392 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Camera, MapPin, LogIn, LogOut, User, Clock } from "lucide-react";
+import {
+  Camera,
+  LogIn,
+  LogOut,
+  Clock,
+  RefreshCw,
+  Loader2,
+  FileText,
+  CalendarDays,
+} from "lucide-react";
+import {
+  markAttendance,
+  getMyAttendance,
+  getDailyReport,
+  getMonthlySummary,
+} from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import imageCompression from "browser-image-compression";
 
 interface AttendanceRecord {
   id: string;
   timestamp: string;
-  type: "check-in" | "check-out";
+  type: "Check-In" | "Check-Out";
   location: string;
+  comment?: string;
+}
+
+interface Address {
+  display_name?: string;
 }
 
 const EmployeeAttendance = () => {
-  const [employeeId, setEmployeeId] = useState("");
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [photoData, setPhotoData] = useState<string | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [recentAttendance, setRecentAttendance] = useState<AttendanceRecord[]>([
-    { id: "1", timestamp: "2025-01-15 09:00 AM", type: "check-in", location: "Office" },
-    { id: "2", timestamp: "2025-01-15 06:00 PM", type: "check-out", location: "Office" },
-  ]);
-  
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { token, isLoggedIn } = useAuth();
 
+  const [locationStatus, setLocationStatus] = useState("");
+  const [comment, setComment] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoData, setPhotoData] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [address, setAddress] = useState<Address | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [recentAttendance, setRecentAttendance] = useState<AttendanceRecord[]>([]);
+  const [dailyReport, setDailyReport] = useState<any>(null);
+  const [monthlySummary, setMonthlySummary] = useState<any>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 🧾 Fetch Attendance & Reports
   useEffect(() => {
-    // Get location automatically when component mounts
-    getLocation();
-    
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+    const fetchAll = async () => {
+      if (!token) return;
+      try {
+        const data = await getMyAttendance(token);
+        const formatted =
+          data?.data
+            ?.flatMap((record: any) =>
+              record.sessions.map((session: any, index: number) => [
+                {
+                  id: `${record._id}-in-${index}`,
+                  timestamp: new Date(session.checkIn).toLocaleString(),
+                  type: "Check-In",
+                  location: session.checkInStatus || "N/A",
+                  comment: session.checkInComment || "N/A",
+                },
+                {
+                  id: `${record._id}-out-${index}`,
+                  timestamp: new Date(session.checkOut).toLocaleString(),
+                  type: "Check-Out",
+                  location: session.checkOutStatus || "N/A",
+                  comment: session.checkOutComment || "N/A",
+                },
+              ])
+            )
+            .flat()
+            .filter((s: any) => s.timestamp)
+            .reverse() || [];
+
+        setRecentAttendance(formatted);
+
+        const daily = await getDailyReport(token);
+        setDailyReport(daily?.report || daily);
+
+        const now = new Date();
+        const monthly = await getMonthlySummary(token, now.getMonth() + 1, now.getFullYear());
+        setMonthlySummary(monthly?.summary || []);
+      } catch (err: any) {
+        console.error("❌ Failed to fetch reports:", err);
+        toast({
+          title: "Error fetching data",
+          description: err.message || "Could not load reports",
+          variant: "destructive",
+        });
       }
     };
-  }, [stream]);
 
-  const getLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          toast({
-            title: "Location captured",
-            description: "Your current location has been recorded.",
-          });
-        },
-        (error) => {
-          toast({
-            title: "Location error",
-            description: "Could not get your location. Please enable location services.",
-            variant: "destructive",
-          });
-        }
-      );
-    } else {
+    fetchAll();
+  }, [token]);
+
+  // 📅 Fetch Monthly Summary
+  const handleMonthChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSelectedMonth(value);
+    if (!token || !value) return;
+    const [year, month] = value.split("-");
+    try {
+      const monthly = await getMonthlySummary(token, Number(month), Number(year));
+      setMonthlySummary(monthly?.summary || []);
+    } catch (err: any) {
       toast({
-        title: "Location not supported",
-        description: "Your browser doesn't support geolocation.",
+        title: "Failed to fetch monthly summary",
+        description: err.message,
         variant: "destructive",
       });
     }
   };
 
-  const startCamera = async () => {
-    if (!employeeId) {
+  // 🌍 Reverse Geocode
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setAddress({ display_name: data.display_name });
+    } catch {
+      toast({ title: "Location error", variant: "destructive" });
+    }
+  }, []);
+
+  // 📍 Get Location
+  const getLocation = useCallback(() => {
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setLocation(coords);
+        setIsLocating(false);
+        await reverseGeocode(coords.lat, coords.lng);
+      },
+      () => {
+        toast({ title: "Unable to get location", variant: "destructive" });
+        setIsLocating(false);
+      }
+    );
+  }, [reverseGeocode]);
+
+  useEffect(() => {
+    getLocation();
+  }, [getLocation]);
+
+  // 📸 Capture & Compress Photo
+  const handlePhotoCapture = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // 🔹 Compression options
+      const options = {
+        maxSizeMB: 0.3, // Target under 300KB
+        maxWidthOrHeight: 800, // Resize large images
+        useWebWorker: true,
+      };
+
+      // 🔹 Compress the image
+      const compressedFile = await imageCompression(file, options);
+
+      // 🔹 Read preview
+      const reader = new FileReader();
+      reader.onloadend = () => setPhotoData(reader.result as string);
+      reader.readAsDataURL(compressedFile);
+
+      setPhotoFile(compressedFile);
+
       toast({
-        title: "Employee ID required",
-        description: "Please enter your Employee ID first.",
+        title: "Photo compressed successfully",
+        description: `Original: ${(file.size / 1024 / 1024).toFixed(2)}MB → Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
+      });
+    } catch (error) {
+      toast({
+        title: "Compression Failed",
+        description: "Please try again or capture a smaller image.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const triggerCamera = () => {
+    if (!locationStatus) {
+      toast({ title: "Enter Location Status first", variant: "destructive" });
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  // 🕒 Mark Attendance
+  const handleAttendance = async (type: "Check-In" | "Check-Out") => {
+    if (!isLoggedIn || !token) {
+      toast({
+        title: "Not logged in",
+        description: "Please login first.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!location) {
+    if (!locationStatus || !location || !photoFile) {
       toast({
-        title: "Location required",
-        description: "Please allow location access first.",
+        title: "Missing Information",
+        description: "Enter status, capture selfie, and enable location.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "user" } 
+      const res = await markAttendance({
+        token,
+        checkType: type,
+        latitude: location.lat,
+        longitude: location.lng,
+        locationStatus,
+        comment,
+        selfieFile: photoFile,
       });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-      setIsCapturing(true);
-    } catch (error) {
+
       toast({
-        title: "Camera error",
-        description: "Could not access camera. Please allow camera permissions.",
+        title: `${type} Successful`,
+        description: res.message || "Recorded successfully",
+      });
+
+      setPhotoData(null);
+      setPhotoFile(null);
+      setLocationStatus("");
+      setComment("");
+    } catch (err: any) {
+      toast({
+        title: "Attendance Failed",
+        description: err.message || "Server error",
         variant: "destructive",
       });
     }
   };
 
-  const capturePhoto = () => {
-    if (videoRef.current) {
-      const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0);
-        const imageData = canvas.toDataURL("image/png");
-        setPhotoData(imageData);
-        
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
-          setStream(null);
-        }
-        setIsCapturing(false);
-        
-        toast({
-          title: "Photo captured",
-          description: "Your photo has been captured successfully.",
-        });
-      }
-    }
-  };
-
-  const handleAttendance = (type: "check-in" | "check-out") => {
-    if (!employeeId) {
-      toast({
-        title: "Employee ID required",
-        description: "Please enter your Employee ID.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!location) {
-      toast({
-        title: "Location required",
-        description: "Please allow location access.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!photoData) {
-      toast({
-        title: "Photo required",
-        description: "Please capture your photo first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newRecord: AttendanceRecord = {
-      id: Date.now().toString(),
-      timestamp: new Date().toLocaleString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }),
-      type,
-      location: `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`,
-    };
-
-    setRecentAttendance([newRecord, ...recentAttendance.slice(0, 4)]);
-    
-    toast({
-      title: `${type === "check-in" ? "Check-In" : "Check-Out"} successful!`,
-      description: `Recorded at ${newRecord.timestamp}`,
-    });
-
-    // Reset form
-    setEmployeeId("");
-    setPhotoData(null);
-    setLocation(null);
-    setTimeout(() => getLocation(), 500);
+  // 📍 Render Address
+  const renderAddress = () => {
+    if (isLocating)
+      return (
+        <div className="text-sm text-muted-foreground flex items-center">
+          <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Fetching location...
+        </div>
+      );
+    if (!address && !location)
+      return <div className="text-sm text-muted-foreground">Location not available.</div>;
+    if (address?.display_name)
+      return <div className="text-sm text-muted-foreground">{address.display_name}</div>;
+    if (location)
+      return (
+        <div className="text-sm text-muted-foreground">
+          Lat: {location.lat.toFixed(4)}, Lng: {location.lng.toFixed(4)}
+        </div>
+      );
   };
 
   return (
-    <section id="attendance" className="py-20 bg-secondary/30">
+    <section className="py-8 bg-secondary/30" id="attendance">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-fade-up">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Employee <span className="bg-gradient-primary bg-clip-text text-transparent">Attendance</span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Quick and secure attendance tracking with location and photo verification
-            </p>
+        <Card className="p-6 md:p-8 shadow-xl space-y-6">
+          <h2 className="text-3xl font-bold text-center">Employee Attendance</h2>
+
+          <Input
+            type="text"
+            placeholder="Enter your Location Status (e.g., Office, Site A)"
+            value={locationStatus}
+            onChange={(e) => setLocationStatus(e.target.value)}
+          />
+
+          <div className="flex items-center justify-between bg-secondary p-4 rounded-lg">
+            <div>
+              <div className="font-semibold text-foreground">Detected Location</div>
+              {renderAddress()}
+            </div>
+            <Button onClick={getLocation} size="sm" disabled={isLocating}>
+              {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            </Button>
           </div>
 
-          <Card className="p-8 shadow-glow animate-fade-up">
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  <User className="w-4 h-4 inline mr-2" />
-                  Employee ID
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Enter your Employee ID"
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  className="text-lg"
-                />
-              </div>
+          <Input
+            type="text"
+            placeholder="Enter a comment (optional)"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
 
-              <div className="flex items-center gap-4 p-4 bg-secondary rounded-lg">
-                <MapPin className={`w-5 h-5 ${location ? "text-primary" : "text-muted-foreground"}`} />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground">Location Status</div>
-                  <div className="text-sm text-muted-foreground">
-                    {location 
-                      ? `Lat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}`
-                      : "Fetching location..."}
-                  </div>
-                </div>
-              </div>
+          {/* Selfie Input */}
+          <input
+            type="file"
+            accept="image/*"
+            capture="user"
+            ref={fileInputRef}
+            onChange={handlePhotoCapture}
+            className="hidden"
+          />
 
-              {!isCapturing && !photoData && (
-                <Button 
-                  onClick={startCamera} 
-                  variant="outline" 
-                  className="w-full"
-                  size="lg"
-                >
-                  <Camera className="w-5 h-5" />
-                  Capture Photo
-                </Button>
-              )}
+          <Button onClick={triggerCamera} className="w-full" size="lg">
+            <Camera className="w-5 h-5 mr-2" /> {photoData ? "Retake Photo" : "Capture Selfie"}
+          </Button>
 
-              {isCapturing && (
-                <div className="space-y-4">
-                  <div className="relative rounded-lg overflow-hidden bg-black">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="w-full"
-                    />
-                  </div>
-                  <Button 
-                    onClick={capturePhoto} 
-                    variant="default"
-                    className="w-full"
-                    size="lg"
-                  >
-                    Take Photo
-                  </Button>
-                </div>
-              )}
+          {photoData && (
+            <img
+              src={photoData}
+              alt="Captured selfie"
+              className="rounded-lg w-full max-h-96 object-cover border shadow-sm"
+            />
+          )}
 
-              {photoData && (
-                <div className="space-y-4">
-                  <div className="relative rounded-lg overflow-hidden">
-                    <img src={photoData} alt="Captured" className="w-full" />
-                  </div>
-                  <Button 
-                    onClick={() => {
-                      setPhotoData(null);
-                      startCamera();
-                    }} 
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Retake Photo
-                  </Button>
-                </div>
-              )}
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <Button onClick={() => handleAttendance("Check-In")} disabled={!photoFile}>
+              <LogIn className="w-5 h-5 mr-2" /> Check In
+            </Button>
+            <Button onClick={() => handleAttendance("Check-Out")} variant="outline" disabled={!photoFile}>
+              <LogOut className="w-5 h-5 mr-2" /> Check Out
+            </Button>
+          </div>
+        </Card>
 
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <Button 
-                  onClick={() => handleAttendance("check-in")}
-                  variant="default"
-                  size="lg"
-                  className="w-full"
-                >
-                  <LogIn className="w-5 h-5" />
-                  Check In
-                </Button>
-                <Button 
-                  onClick={() => handleAttendance("check-out")}
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                >
-                  <LogOut className="w-5 h-5" />
-                  Check Out
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          <div className="mt-12">
-            <h3 className="text-2xl font-bold mb-6 text-foreground flex items-center gap-2">
-              <Clock className="w-6 h-6 text-primary" />
-              Recent Attendance
+        {/* Recent Attendance */}
+        {recentAttendance.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5" /> Recent Attendance
             </h3>
-            <div className="space-y-3">
-              {recentAttendance.map((record) => (
-                <Card 
-                  key={record.id} 
-                  className="p-4 flex items-center justify-between hover:shadow-soft transition-all"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-lg ${
-                      record.type === "check-in" 
-                        ? "bg-primary/10 text-primary" 
-                        : "bg-accent/10 text-accent"
-                    }`}>
-                      {record.type === "check-in" ? (
-                        <LogIn className="w-5 h-5" />
-                      ) : (
-                        <LogOut className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-medium text-foreground capitalize">
-                        {record.type.replace("-", " ")}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {record.timestamp}
-                      </div>
-                    </div>
+            {recentAttendance.map((r) => (
+              <Card key={r.id} className="p-4 mb-2">
+                <div className="flex justify-between">
+                  <div>
+                    <div className="font-medium">{r.type}</div>
+                    <div className="text-sm text-muted-foreground">{r.timestamp}</div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {record.location}
+                  <div className="text-sm text-muted-foreground text-right">
+                    <span className="font-medium">Location:</span> {r.location}
+                    <br />
                   </div>
-                </Card>
-              ))}
-            </div>
+                </div>
+              </Card>
+            ))}
           </div>
+        )}
+
+        {/* Daily Report */}
+        {dailyReport && (
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+              <FileText className="w-5 h-5" /> Daily Report
+            </h3>
+            <Card className="p-4">
+              {dailyReport?.[0] ? (
+                <div className="flex items-center justify-between text-sm">
+                  <span>📅 Date: {dailyReport[0].date}</span>
+                  <span>⏱️ Total Hours: {dailyReport[0].totalHours?.toFixed(2) || 0} hrs</span>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No daily data available.</p>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* Monthly Summary */}
+        <div className="mt-8">
+          <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+            <CalendarDays className="w-5 h-5" /> Monthly Summary
+          </h3>
+          <Input type="month" value={selectedMonth} onChange={handleMonthChange} className="mb-4 w-fit" />
+          <Card className="p-4">
+            {monthlySummary && monthlySummary.length > 0 ? (
+              monthlySummary.map((m: any) => (
+                <div key={m._id} className="text-sm mb-2 border-b pb-2">
+                  📅 {m.date} — ⏱️ {m.totalHours?.toFixed(2) || 0} hrs
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No monthly data found.</p>
+            )}
+          </Card>
         </div>
       </div>
     </section>

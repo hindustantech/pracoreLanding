@@ -3,22 +3,24 @@ import { Target, Users, Lightbulb } from "lucide-react";
 
 const AboutSection = () => {
   return (
-    <section id="about" className="py-20 bg-background">
+    <section id="about" className="pt-2 pb-2 bg-background">
+
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              About <span className="bg-gradient-primary bg-clip-text text-transparent">Precore</span>
+              About <span className="bg-gradient-primary bg-clip-text text-transparent">Praecore</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Empowering businesses through innovative technology solutions
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+          <div className="grid md:grid-cols-1 gap-4 items-center mb-2">
+
             <div className="space-y-6 animate-fade-up">
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Precore is a dynamic software company dedicated to building products that transform 
+                Praecore is a dynamic software company dedicated to building products that transform 
                 businesses. We specialize in creating scalable, user-friendly applications that solve 
                 real-world problems for companies across various industries.
               </p>
@@ -56,15 +58,16 @@ const AboutSection = () => {
             </div>
 
             <div className="animate-fade-up">
-              <div className="relative group">
+              {/* <div className="relative group">
                 <div className="absolute -inset-4 bg-gradient-primary rounded-3xl opacity-20 blur-2xl group-hover:opacity-30 transition-opacity"></div>
                 <img 
                   src={teamPhoto} 
                   alt="Precore Team" 
                   className="relative rounded-2xl shadow-glow w-full hover:scale-105 transition-transform duration-500"
                 />
-              </div>
-              <div className="mt-8 flex items-center justify-center gap-4">
+              </div> */}
+              {/* <div className="mt-4 flex items-center justify-center gap-4">
+
                 <div className="text-center p-4">
                   <div className="text-3xl font-bold text-primary">20+</div>
                   <div className="text-sm text-muted-foreground">Team Members</div>
@@ -79,7 +82,7 @@ const AboutSection = () => {
                   <div className="text-3xl font-bold text-primary">2</div>
                   <div className="text-sm text-muted-foreground">Active Products</div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
