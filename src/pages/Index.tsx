@@ -11,7 +11,6 @@ import salonmasterMockup from "@/assets/salonmaster-mockup1.png";
 
 const Index = () => {
   return (
-<<<<<<< HEAD
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* ✅ Navbar */}
       <Navbar />
@@ -22,14 +21,6 @@ const Index = () => {
       </section>
 
       {/* ✅ Startups Section */}
-=======
-    <div className="min-h-screen">
-      <Navbar />
-      <div id="home">
-        <HeroSection />
-      </div>
-      
->>>>>>> f3cd0b43c67dabd2babc88d89d44f0d202137e18
       <section id="startups" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-up">
@@ -89,6 +80,22 @@ operating system for the modern salon professional.
                 mockupImage={salonmasterMockup}
               />
             </div>
+            <div className="animate-fade-up" data-delay="200">
+              <StartupCard
+                name="UAI-App"
+                description="In the dynamic, fast-paced, and highly competitive world of salon business, fragmentation is the
+single greatest barrier to growth. Stylists seek better job opportunities, authentic source of SOP of
+the products which they use, reference and revaluation of their techniques but lack a centralized
+Attendance platform. Salon owners struggle with recruitment, availability of right product . Product companies spend fortunes on inefficient, in-person training and launches. Academies and franchisors grapple
+with limited reach. And the entire industry lacks a unified digital coherent eco system which can
+bring synergy in the business transactions.
+."
+                websiteUrl="https://hr.praecore.in/"
+                appUrl="https://play.google.com/store/apps/details?id=com.uai.attendance&hl=en"
+                mockupImage={salonmasterMockup}
+              />
+            </div>
+            
           </div>
         </div>
       </section>
@@ -98,10 +105,6 @@ operating system for the modern salon professional.
         <AboutSection />
       </section>
 
-      {/* ✅ Employee Attendance Section */}
-      {/* <section id="attendance" className="py-20 bg-secondary/10">
-        <EmployeeAttendance />
-      </section> */}
 
       {/* ✅ Contact Section */}
       <section id="contact" className="py-20">

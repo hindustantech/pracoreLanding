@@ -20,7 +20,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-<<<<<<< HEAD
   // ✅ Filter nav items based on login status
   const navItems = [
     { name: "Home", href: "/" },

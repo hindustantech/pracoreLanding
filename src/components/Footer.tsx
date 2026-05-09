@@ -15,31 +15,31 @@ const Footer = () => {
               Building products that help businesses grow.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
+              <a
+                href="https://linkedin.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 bg-secondary hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
+              <a
+                href="https://twitter.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 bg-secondary hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               >
                 <Twitter className="w-5 h-5" />
               </a>
-              <a 
-                href="https://github.com" 
-                target="_blank" 
+              <a
+                href="https://github.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 bg-secondary hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               >
                 <Github className="w-5 h-5" />
               </a>
-              <a 
+              <a
                 href="mailto:contact@precore.in"
                 className="p-2 bg-secondary hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               >
@@ -59,6 +59,11 @@ const Footer = () => {
               <li>
                 <a href="#startups" className="text-muted-foreground hover:text-primary transition-colors">
                   SalonMaster
+                </a>
+              </li>
+              <li>
+                <a href="#startups" className="text-muted-foreground hover:text-primary transition-colors">
+                  Universal Attendance Interface (UAI)
                 </a>
               </li>
             </ul>
@@ -89,13 +94,28 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
+                <a href="/UAI/TermsAndCondition" className="text-muted-foreground hover:text-primary transition-colors">
+                  Privacy Policy UAI
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Terms of Service
+                <a href="/UAI/PrivacyPolicy" className="text-muted-foreground hover:text-primary transition-colors">
+                  Terms of Service UAI
+                </a>
+              </li>
+              <li>
+                <a href="/UAI/UniversalAttendanceDocs" className="text-muted-foreground hover:text-primary transition-colors">
+                  How its Work UAI
+                </a>
+              </li>
+              <li>
+                <a href="/UAI/DeleteAccount" className="text-muted-foreground hover:text-primary transition-colors">
+                  Delete Account UAI
+                </a>
+              </li>
+              <li>
+                <a href="/UAI/CreateLeadPage" className="text-muted-foreground hover:text-primary transition-colors">
+                  Create Lead UAI
                 </a>
               </li>
               <li>
