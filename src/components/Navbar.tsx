@@ -66,22 +66,22 @@ const Navbar = () => {
       }`}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* ✅ Logo */}
           <div
             onClick={() => navigate("/")}
-            className="cursor-pointer text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent"
+            className="cursor-pointer text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-primary bg-clip-text text-transparent"
           >
             Praecore
           </div>
 
           {/* ✅ Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navItems.map((item) => (
               <button
                 key={item.name}
                 onClick={() => handleNavClick(item.href)}
-                className={`relative font-medium transition-colors pb-1 ${
+                className={`relative font-medium transition-colors pb-1 text-sm lg:text-base ${
                   isActive(item.href)
                     ? "text-primary"
                     : "text-foreground/80 hover:text-primary"
