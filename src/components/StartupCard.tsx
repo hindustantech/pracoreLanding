@@ -11,14 +11,14 @@ interface StartupCardProps {
 
 const StartupCard = ({ name, description, websiteUrl, appUrl, mockupImage }: StartupCardProps) => {
   return (
-    <div className="group bg-card rounded-2xl shadow-soft hover:shadow-glow transition-all duration-500 overflow-hidden border border-border hover:border-primary">
-      <div className="p-4">
-        <div className="flex flex-col md:flex-row gap-8 items-center">
+    <div className="group bg-card rounded-2xl md:rounded-3xl shadow-soft hover:shadow-glow transition-all duration-500 overflow-hidden border border-border hover:border-primary/70">
+      <div className="p-5 sm:p-6 lg:p-8">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-12 items-center">
           <div className="flex-1 order-2 md:order-1">
-            <h3 className="text-3xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors tracking-tight">
               {name}
             </h3>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 leading-relaxed">
               {description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -47,7 +47,7 @@ const StartupCard = ({ name, description, websiteUrl, appUrl, mockupImage }: Sta
               <img 
                 src={mockupImage} 
                 alt={`${name} app mockup`}
-                className="relative w-64 h-auto drop-shadow-2xl animate-float"
+                className="relative w-44 sm:w-52 md:w-56 lg:w-64 h-auto drop-shadow-2xl animate-float"
               />
             </div>
           </div>

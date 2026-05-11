@@ -21,16 +21,16 @@ const Index = () => {
       </section>
 
       {/* ✅ Startups Section */}
-      <section id="startups" className="py-20 bg-secondary/30">
+      <section id="startups" className="py-16 md:py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-up">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-foreground tracking-tight">
               Our{" "}
               <span className="bg-gradient-primary bg-clip-text text-transparent">
                 Solutions
               </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Innovative products designed to transform businesses
             </p>
           </div>

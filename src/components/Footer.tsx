@@ -6,12 +6,12 @@ const Footer = () => {
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
               Praecore
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
               Building products that help businesses grow.
             </p>
             <div className="flex gap-4">
@@ -95,12 +95,12 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <a href="/UAI/TermsAndCondition" className="text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy UAI
+                  Terms & Conditions UAI
                 </a>
               </li>
               <li>
                 <a href="/UAI/PrivacyPolicy" className="text-muted-foreground hover:text-primary transition-colors">
-                  Terms of Service UAI
+                  Privacy Policy UAI
                 </a>
               </li>
               <li>
