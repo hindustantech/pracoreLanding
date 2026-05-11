@@ -11,8 +11,8 @@ interface StartupCardProps {
 
 const StartupCard = ({ name, description, websiteUrl, appUrl, mockupImage }: StartupCardProps) => {
   return (
-    <div className="group bg-card rounded-3xl shadow-soft hover:shadow-glow transition-all duration-500 overflow-hidden border border-border hover:border-primary">
-      <div className="p-8">
+    <div className="group bg-card rounded-2xl shadow-soft hover:shadow-glow transition-all duration-500 overflow-hidden border border-border hover:border-primary">
+      <div className="p-4">
         <div className="flex flex-col md:flex-row gap-8 items-center">
           <div className="flex-1 order-2 md:order-1">
             <h3 className="text-3xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">

@@ -83,19 +83,14 @@ operating system for the modern salon professional.
             <div className="animate-fade-up" data-delay="200">
               <StartupCard
                 name="UAI-App"
-                description="In the dynamic, fast-paced, and highly competitive world of salon business, fragmentation is the
-single greatest barrier to growth. Stylists seek better job opportunities, authentic source of SOP of
-the products which they use, reference and revaluation of their techniques but lack a centralized
-Attendance platform. Salon owners struggle with recruitment, availability of right product . Product companies spend fortunes on inefficient, in-person training and launches. Academies and franchisors grapple
-with limited reach. And the entire industry lacks a unified digital coherent eco system which can
-bring synergy in the business transactions.
+                description="UAI is a modern human resource and workforce management platform designed to streamline employee operations, attendance tracking, payroll coordination, and organizational management. The platform focuses on improving business productivity through scalable, user-friendly, and technology-driven HR solutions. Praecore delivers efficient digital systems that help companies manage employees, optimize workflows, and enhance operational transparency.
 ."
                 websiteUrl="https://hr.praecore.in/"
                 appUrl="https://play.google.com/store/apps/details?id=com.uai.attendance&hl=en"
                 mockupImage={salonmasterMockup}
               />
             </div>
-            
+
           </div>
         </div>
       </section>
